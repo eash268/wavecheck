@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "63977119107",
+    "firebase_url": "https://wavecheck-8b1ae.firebaseio.com",
+    "project_id": "wavecheck-8b1ae",
+    "storage_bucket": "wavecheck-8b1ae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63977119107:android:6199665b71ff2914b8aab6",
+        "android_client_info": {
+          "package_name": "com.eashaggarwal.wavecheck"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "63977119107-t9ji7dfhp9ppumvqrnbomgsb6rkai5js.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eashaggarwal.wavecheck",
+            "certificate_hash": "7827e5d7a7ec99cfa7f97834aede99165180af57"
+          }
+        },
+        {
+          "client_id": "63977119107-gojpkaertr30951qhgli9vr6f8m976c6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0H56UWhIFZbGw7gE4MenkeaoEnUGuJYs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63977119107-gojpkaertr30951qhgli9vr6f8m976c6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "63977119107-647ar8ej5spl6ejp9d2n9mtgjjojr062.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.eashaggarwal.wavecheck"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
