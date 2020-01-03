@@ -1,5 +1,5 @@
-name: fluttershare
-description: A new Flutter project.
+name: WaveCheck
+description: Instagram for your daily to-do list! Every morning, enter your list of goals for the day to our app. Then, upload a picture or video of you achieving these goals for your friends to see! A list of your closest friends or family members who you select will see your posts as you complete your daily goals and share theirs with you as well. Our mission is to harness the power of content sharing and social motivation to help everyone achieve their goals!
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -14,28 +14,28 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  animator: 0.1.4
   cloud_firestore: ^0.9.7+2
   image_picker: ^0.6.0+2
-  firebase_storage: ^2.1.0+1
+  flutter_svg:
   firebase_auth: ^0.8.3
+  firebase_messaging: ^4.0.0+1
+  firebase_storage: ^2.1.0+1
   google_sign_in: ^4.0.1+1
   geolocator: 5.0.1
   uuid: ^2.0.0
   image: ^2.0.7
-  animator: 0.1.4
   cupertino_icons: ^0.1.2
   path_provider: ^0.5.0+1
-  firebase_messaging: ^4.0.0+1
   timeago: 2.0.17
   cached_network_image:
-  flutter_svg:
   like_button: ^0.1.9
-  liquid_pull_to_refresh: ^1.1.0
+  carousel_slider: ^1.4.0
 
 dev_dependencies:
   flutter_test:
@@ -48,21 +48,39 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   fonts:
-    - family: Signatra
+    - family: NunitoSans
       fonts:
-        - asset: assets/fonts/Signatra.ttf
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Medium.ttf
-    - family: OpenSans
-      fonts:
-        - asset: assets/fonts/OpenSans-ExtraBold.ttf
+        - asset: assets/fonts/NunitoSans-Regular.ttf
     - family: Pacifico
       fonts:
         - asset: assets/fonts/Pacifico-Regular.ttf
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway-Regular.ttf
+        - asset: assets/fonts/Raleway-Bold.ttf
+    - family: Bitter
+      fonts:
+        - asset: assets/fonts/Bitter-Regular.ttf
+        - asset: assets/fonts/Bitter-Bold.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/OpenSans-Bold.ttf
   assets:
     - assets/images/google_signin_button.png
     - assets/images/upload.svg
     - assets/images/search.svg
     - assets/images/activity_feed.svg
     - assets/images/no_content.svg
+    - assets/images/strong.png
+    - assets/images/remedy.png
+    - assets/images/bottle.png
+    - assets/images/group.png
+    - assets/images/success.png
+    - assets/images/fitness.png
+    - assets/images/book.png
+    - assets/images/push-ups.png
