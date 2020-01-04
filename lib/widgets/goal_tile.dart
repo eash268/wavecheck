@@ -5,17 +5,41 @@ import 'package:flutter/material.dart';
 import 'package:WaveCheck/pages/full_post.dart';
 import 'package:WaveCheck/pages/profile.dart';
 import 'package:WaveCheck/widgets/progress.dart';
+import 'package:share/share.dart';
 
 final goalsRef = Firestore.instance.collection('goals');
 final usersRef = Firestore.instance.collection('users');
 
-class GoalsItem extends StatelessWidget {
+class GoalsItem extends StatefulWidget {
   final String goalID;
   final String goalName;
   final String goalUserID;
   final String goalImageURL;
   final bool completed;
-  const GoalsItem(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
+
+  GoalsItem(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
+
+  factory GoalsItem.fromDocument(DocumentSnapshot doc) {
+    return GoalsItem(
+      doc.documentID,
+      doc['goal_string'],
+      doc['fk_user_id'],
+      doc['urls'][0],
+      doc['completed'],
+    );
+  }
+
+  @override
+  _GoalsItemState createState() => _GoalsItemState(goalID, goalName, goalUserID, goalImageURL, completed);
+}
+
+class _GoalsItemState extends State<GoalsItem> {
+  final String goalID;
+  final String goalName;
+  final String goalUserID;
+  final String goalImageURL;
+  final bool completed;
+  _GoalsItemState(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
 
   _showCompleteButton(context) {
     return FlatButton(
@@ -177,14 +201,16 @@ _showImageSlider(img) {
             },
             child: completed? _showImageSlider(goalImageURL) : Container(height: 0.0, width: 0.0, padding: EdgeInsets.all(0.0),),
           ),
+
           Container(
             width: 1000,
-            margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 0.0),
+            margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 0.0, bottom: 12.0),
             child: completed ? _showJoinButton() : _showCompleteButton(context),
           ),
+
           Container(
             width: 1000,
-            padding: EdgeInsets.only(top: 12.0, left: 18.0, right: 18.0, bottom: 12.0),
+            padding: EdgeInsets.only(top: 6.0, left: 18.0, right: 18.0, bottom: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -225,7 +251,7 @@ _showImageSlider(img) {
                     ),
                     CircleAvatar(
                       backgroundColor: Theme.of(context).primaryColor,
-                      backgroundImage: NetworkImage("http://lorempixel.com/100/200/people/Dummy-Text/"),
+                      backgroundImage: NetworkImage("http://lorempixel.com/100/200/people/"),
                       radius: 9.0,
                     ),
                     Text(" +33",
@@ -247,8 +273,21 @@ _showImageSlider(img) {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 makeLikeButton(isActive: true),
-                makeCommentButton(),
-                makeShareButton(),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => FullPost(goalID, goalName, goalUserID, goalImageURL, completed)),
+                    );
+                  },
+                  child: makeCommentButton(),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    completed? Share.share('goalImageURL') : Share.share('https://example.com');
+                  },
+                  child: makeShareButton(),
+                ),
               ],
             ),
           ),

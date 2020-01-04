@@ -22,10 +22,9 @@ class _PostScreenState extends State<PostScreen> {
 
   submit() async {
     _formKey.currentState.save();
-    print(goal);
 
     // 3) get username from create account, use it to make new user document in users collection
-    goalsRef.document().setData({
+    await goalsRef.document().setData({
       "fk_user_id": userID,
       "goal_string": goal,
       "timestamp": timestamp,
@@ -71,7 +70,8 @@ class _PostScreenState extends State<PostScreen> {
         children: <Widget>[
           Container(
             color: Colors.white,
-            padding: EdgeInsets.only(left: 16.0, right: 16.0, top:2.0, bottom: 20.0),
+            padding: EdgeInsets.only(left: 16.0, right: 16.0, top:20.0, bottom: 20.0),
+            margin: EdgeInsets.only(top:12.0),
             child: Column(
               children: <Widget>[
                 Form(
@@ -112,7 +112,7 @@ class _PostScreenState extends State<PostScreen> {
           ),
           Container(
             margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 20.0, bottom: 20.0),
-            child: Text("Or choose from our list:", 
+            child: Text("If you want to explore your artistic side...", 
               style: TextStyle(
                 fontSize: 20.0,
                 fontFamily: 'Roboto',

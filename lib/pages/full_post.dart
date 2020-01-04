@@ -1,3 +1,4 @@
+import 'package:WaveCheck/widgets/full_goal_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:WaveCheck/widgets/goal_tile.dart';
@@ -29,19 +30,20 @@ class _FullPostState extends State<FullPost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Back',
-          icon: const Icon(Icons.keyboard_arrow_left),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        backgroundColor: Colors.white,
+        bottomOpacity: 0.0,
+        elevation: 0.0,
+        iconTheme: IconThemeData(
+          color: Colors.black, //change your color here
         ),
-        title: Text("Goal",
+        title: Text("",
           style: TextStyle(
-            fontSize: 24.0,
+            fontSize: 20.0,
             fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.black
           ),
         ),
         actions: <Widget>[],
@@ -49,10 +51,10 @@ class _FullPostState extends State<FullPost> {
       body: ListView(
         children: <Widget>[
           Container(
-            margin: EdgeInsets.only(top: 16.0),
+            margin: EdgeInsets.only(top: 12.0),
             child: Column(
               children: <Widget>[
-                GoalsItem(goalID, goalName, goalUserID, goalImageURL, completed)
+                FullGoalsItem(goalID, goalName, goalUserID, goalImageURL, completed)
               ],
             ),
           )
