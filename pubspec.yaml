@@ -33,10 +33,11 @@ dependencies:
   cupertino_icons: ^0.1.2
   path_provider: ^0.5.0+1
   timeago: 2.0.17
-  cached_network_image:
   like_button: ^0.1.9
   carousel_slider: ^1.4.0
   share: ^0.6.3+5
+  time_ago_provider: ^1.0.3
+  cached_network_image: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -72,16 +73,15 @@ flutter:
         - asset: assets/fonts/OpenSans-Regular.ttf
         - asset: assets/fonts/OpenSans-Bold.ttf
   assets:
-    - assets/images/google_signin_button.png
-    - assets/images/upload.svg
-    - assets/images/search.svg
-    - assets/images/activity_feed.svg
-    - assets/images/no_content.svg
-    - assets/images/strong.png
-    - assets/images/remedy.png
-    - assets/images/bottle.png
-    - assets/images/group.png
-    - assets/images/success.png
-    - assets/images/fitness.png
-    - assets/images/book.png
-    - assets/images/push-ups.png
+    - assets/images/artistic.png
+    - assets/images/confident.png
+    - assets/images/camera.png
+    - assets/images/eathealthy.png
+    - assets/images/happiness.png
+    - assets/images/metabolism.png
+    - assets/images/organized.png
+    - assets/images/productive.png
+    - assets/images/shape.png
+    - assets/images/spiritual.png
+    - assets/images/livelonger.png
+    - assets/images/stress.png

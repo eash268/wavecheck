@@ -1,11 +1,13 @@
+import 'package:WaveCheck/models/user.dart';
 import 'package:WaveCheck/pages/upload.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:WaveCheck/pages/full_post.dart';
-import 'package:WaveCheck/pages/profile.dart';
 import 'package:WaveCheck/widgets/progress.dart';
 import 'package:share/share.dart';
+import 'package:time_ago_provider/time_ago_provider.dart';
 
 final goalsRef = Firestore.instance.collection('goals');
 final usersRef = Firestore.instance.collection('users');
@@ -15,31 +17,38 @@ class GoalsItem extends StatefulWidget {
   final String goalName;
   final String goalUserID;
   final String goalImageURL;
+  final Timestamp timestamp;
   final bool completed;
+  final List goalLikes;
+  final User currentUser;
 
-  GoalsItem(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
-
-  factory GoalsItem.fromDocument(DocumentSnapshot doc) {
-    return GoalsItem(
-      doc.documentID,
-      doc['goal_string'],
-      doc['fk_user_id'],
-      doc['urls'][0],
-      doc['completed'],
-    );
-  }
+  GoalsItem(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.timestamp, this.completed, this.goalLikes, this.currentUser);
 
   @override
-  _GoalsItemState createState() => _GoalsItemState(goalID, goalName, goalUserID, goalImageURL, completed);
+  _GoalsItemState createState() => _GoalsItemState();
 }
 
 class _GoalsItemState extends State<GoalsItem> {
-  final String goalID;
-  final String goalName;
-  final String goalUserID;
-  final String goalImageURL;
-  final bool completed;
-  _GoalsItemState(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
+  _showJoinConfirm(goal) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text("Would you like to add \"$goal\" to your own goals?"),
+          children: <Widget>[
+            SimpleDialogOption(
+                child: Text("Yes I would"), 
+                onPressed: () {}
+            ),
+            SimpleDialogOption(
+              child: Text("No, thanks"),
+              onPressed: () => Navigator.pop(context),
+            )
+          ],
+        );
+      },
+    );
+  }
 
   _showCompleteButton(context) {
     return FlatButton(
@@ -49,12 +58,12 @@ class _GoalsItemState extends State<GoalsItem> {
       padding: EdgeInsets.all(12.0),
       splashColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: new BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(10.0),
       ),
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Upload()),
+          MaterialPageRoute(builder: (context) => Upload(widget.goalID, widget.currentUser)),
         );
       },
       child: Row(
@@ -71,67 +80,162 @@ class _GoalsItemState extends State<GoalsItem> {
     );
   }
 
-  _showJoinButton() {
-    return FlatButton(
-      color: const Color(0xFF46A4E4),
-      textColor: Colors.white,
-      padding: EdgeInsets.all(12.0),
-      splashColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: new BorderRadius.circular(10.0),
-      ),
-      onPressed: () {},
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            "Tap to Join",
-            style: TextStyle(
-              fontSize: 14.0,
-            ),
-          )
-        ],
-      ),
+  _showJoinButton(goalName) {
+    var showJoinButton = true;
+    if (showJoinButton) {
+      return FlatButton(
+        color: const Color(0xFF2364CC),
+        textColor: Colors.white,
+        padding: EdgeInsets.all(12.0),
+        splashColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        onPressed: () {
+          _showJoinConfirm(goalName);
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              "Tap to Join",
+              style: TextStyle(
+                fontSize: 14.0,
+              ),
+            )
+          ],
+        ),
+      );
+    } else {
+      return SizedBox(height: 0,);
+    }
+  }
+
+  handleActionButton(completed, currentUserOwnsPost, context, goalName) {
+    if (currentUserOwnsPost && completed) {
+      return SizedBox(height: 0,);
+    } else if (currentUserOwnsPost && !completed) {
+      return Container(
+        width: 1000,
+        margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 0.0, bottom: 16.0),
+        child: _showCompleteButton(context),
+      );
+    } else if (!currentUserOwnsPost) {
+      return Container(
+        width: 1000,
+        margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 0.0, bottom: 16.0),
+        child: _showJoinButton(goalName),
+      );
+    }
+  }
+
+  _showImageSlider(img) {
+    return Container(
+    margin: EdgeInsets.only(bottom: 16.0),
+    child: CachedNetworkImage(
+        imageUrl: img,
+        placeholder: (context, url) => CircularProgressIndicator(backgroundColor: Color(0xFF2364CC)),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+        fit: BoxFit.fitWidth,
+        height: 250.0,
+        width: double.infinity,
+     ),
     );
   }
 
-_showImageSlider(img) {
-    if (img.length == 1) {
-      var pics = [img, img];
-      return CarouselSlider(
-        height: 250.0,
-        viewportFraction: 0.90,
-        initialPage: 0,
-        enableInfiniteScroll: false,
-        reverse: false,
-        pauseAutoPlayOnTouch: Duration(seconds: 10),
-        enlargeCenterPage: true,
-        scrollDirection: Axis.horizontal,
-          items: pics.map((i) {
-            return Builder(
-              builder: (BuildContext context) {
-                return Container(
-                  margin: EdgeInsets.only(bottom: 18.0),
-                  child: Image.network(
-                    i,
-                    fit: BoxFit.fitWidth,
-                    width: double.infinity,
-                    height: 250.0,
-                  ));
-              },
-            );
-          }).toList(),
-      );
+  _numLikes(likes) {
+    int count = 0;
+    if (likes == null) {
+      count = -1;
     } else {
-      return Container(
-        margin: EdgeInsets.only(bottom: 18.0),
-        child: Image.network(
-          img,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: 250.0,
-        ));
+      likes.forEach((val) {
+        if (val != '') {
+          count += 1;
+        }
+      });
     }
+
+    if (count == -1 || count == 0) {
+      return "Like this goal:";
+    } else if (count == 1) {
+      return "1 person likes this goal";
+    } else if (count > 1) {
+      return count.toString() + " people like this goal";
+    }
+
+    return "";
+  }
+
+  deletePost() async {
+    // delete post itself
+    await goalsRef
+        .document(widget.goalID)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+  }
+  
+  handleDeletePost(BuildContext parentContext) {
+    return showDialog(
+      context: parentContext,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text("Are you sure you want to delete this goal?"),
+          children: <Widget>[
+            SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  deletePost();
+                },
+                child: Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                )),
+            SimpleDialogOption(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel')),
+          ],
+        );
+      });
+  }
+
+  postActions(parentContext, currentUserOwnsPost, goalName) {
+    return showDialog(
+      context: parentContext,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text("Actions:"),
+          children: <Widget>[
+            SimpleDialogOption(
+              child: Text("Join this goal"), onPressed: () {
+                _showJoinConfirm(goalName);
+              }
+            ),
+            SimpleDialogOption(
+              child: Text("Add a comment"), onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
+                );
+              }
+            ),
+            currentUserOwnsPost? SimpleDialogOption(
+                child: Text("Delete this goal",
+                  style: TextStyle(
+                    color: Colors.red
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  handleDeletePost(context);
+                }
+            ) : SizedBox(height: 0,),
+          ],
+        );
+      });
   }
   
 
@@ -154,7 +258,7 @@ _showImageSlider(img) {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => FullPost(goalID, goalName, goalUserID, goalImageURL, completed)),
+                    MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
                   );
                 },
                 child: Column(
@@ -162,9 +266,9 @@ _showImageSlider(img) {
                     Container(
                       width: 325,
                       alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.only(left: 16.0, top: 16.0),
+                      margin: EdgeInsets.only(left: 16.0, top: 16.0, bottom: 0),
                       child: Container (
-                        child: Text("$goalName", 
+                        child: Text("" + widget.goalName, 
                           style: TextStyle(
                             fontSize: 20.0,
                             fontFamily: 'Roboto',
@@ -180,43 +284,42 @@ _showImageSlider(img) {
               ),
               Container(
                 alignment: Alignment.centerRight,
-                margin: EdgeInsets.only(right: 16.0, top: 20.0),
-                child: Icon(
-                  Icons.more_horiz,
-                  color: Colors.grey,
+                margin: EdgeInsets.only(right: 16.0, top: 12.0),
+                child: GestureDetector(
+                  onTap: () {postActions(context, (widget.currentUser.id == widget.goalUserID), widget.goalName);},
+                    child: Icon(
+                    Icons.more_horiz,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ],
           ),
           Container(
             margin: EdgeInsets.only(bottom: 0.0, top: 0.0,),
-            child: GoalUserHeader(goalID, goalUserID, completed),
+            child: GoalUserHeader(widget.goalID, widget.goalUserID, widget.goalName, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser),
           ),
           GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FullPost(goalID, goalName, goalUserID, goalImageURL, completed)),
+                MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
               );
             },
-            child: completed? _showImageSlider(goalImageURL) : Container(height: 0.0, width: 0.0, padding: EdgeInsets.all(0.0),),
+            child: widget.completed? _showImageSlider(widget.goalImageURL) : Container(height: 0.0, width: 0.0, padding: EdgeInsets.all(0.0),),
           ),
+          
+          handleActionButton(widget.completed, (widget.currentUser.id == widget.goalUserID), context, widget.goalName),
 
           Container(
             width: 1000,
-            margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 0.0, bottom: 12.0),
-            child: completed ? _showJoinButton() : _showCompleteButton(context),
-          ),
-
-          Container(
-            width: 1000,
-            padding: EdgeInsets.only(top: 6.0, left: 18.0, right: 18.0, bottom: 16.0),
+            padding: EdgeInsets.only(top: 0.0, left: 16.0, right: 16.0, bottom: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Column(
                   children: <Widget>[
-                    Text("12 Likes",
+                    Text(_numLikes(widget.goalLikes),
                       style: TextStyle(
                         fontSize: 14.0,
                         //fontStyle: FontStyle.italic,
@@ -268,7 +371,7 @@ _showImageSlider(img) {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0, top: 2.0),
+            margin: EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0, top: 0.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -277,14 +380,14 @@ _showImageSlider(img) {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => FullPost(goalID, goalName, goalUserID, goalImageURL, completed)),
+                      MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
                     );
                   },
                   child: makeCommentButton(),
                 ),
                 GestureDetector(
                   onTap: () {
-                    completed? Share.share('goalImageURL') : Share.share('https://example.com');
+                    (widget.completed == true)? Share.share(widget.goalImageURL) : Share.share("Goal: " + widget.goalName);
                   },
                   child: makeShareButton(),
                 ),
@@ -301,23 +404,24 @@ _showImageSlider(img) {
 class GoalUserHeader extends StatefulWidget {
   final String goalID;
   final String goalUserID;
+  final String goalName;
+  final String goalImageURL;
+  final Timestamp timestamp;
   final bool completed;
-  const GoalUserHeader(this.goalID, this.goalUserID, this.completed);
+  final List goalLikes;
+  final User currentUser;
+
+  const GoalUserHeader(this.goalID, this.goalUserID,this.goalName, this.goalImageURL, this.timestamp, this.completed, this.goalLikes, this.currentUser);
 
   @override
-  _GoalUserHeaderState createState() => _GoalUserHeaderState(goalID, goalUserID, completed);
+  _GoalUserHeaderState createState() => _GoalUserHeaderState();
 }
 
 class _GoalUserHeaderState extends State<GoalUserHeader> {
-  final String goalID;
-  final String goalUserID;
-  final bool completed;
-  _GoalUserHeaderState(this.goalID, this.goalUserID, this.completed);
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: usersRef.document(goalUserID).get(),
+      future: usersRef.document(widget.goalUserID).get(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return circularProgress();
@@ -329,7 +433,7 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
         var profilePic = snapshot.data['profile_pic'];
         var titleString;
 
-        if (completed) {
+        if (widget.completed) {
           titleString = name + ' completed a goal!';
         } else {
           titleString = name + ' added a new goal';
@@ -340,7 +444,7 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Profile(goalUserID, name)),
+                MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
               );
             },
             child: CircleAvatar(
@@ -352,12 +456,21 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Profile(goalUserID, name)),
+                MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
               );
             },
-            child: Text(titleString),
+            child: Text(titleString, 
+              style: TextStyle(
+                fontSize: 14.0,
+              )
+            ),
           ),
-          subtitle: Text('5 mins ago'),
+          subtitle: Text(TimeAgo.getTimeAgo(widget.timestamp.millisecondsSinceEpoch),
+            style: TextStyle(
+              fontSize: 13.0,
+              color: Colors.grey[600]
+            )
+          ),
           dense: false,
         );
       }
@@ -373,13 +486,16 @@ Widget makeLikeButton({isActive}) {
       borderRadius: BorderRadius.circular(50),
     ),
     child: Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(Icons.thumb_up, color: !isActive ? const Color(0xFF46A4E4) : Colors.grey, size: 18,),
-          SizedBox(width: 5,),
-          Text("Like", style: TextStyle(color: !isActive ? const Color(0xFF46A4E4) : Colors.grey[600]),)
-        ],
+      child: GestureDetector(
+        onTap: () {},
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(Icons.thumb_up, color: isActive ? const Color(0xFF2364CC) : Colors.grey, size: 18,),
+            SizedBox(width: 5,),
+            Text("Like", style: TextStyle(color: isActive ? const Color(0xFF2364CC) : Colors.grey[600]),)
+          ],
+        ),
       ),
     ),
   );

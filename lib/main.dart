@@ -13,8 +13,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'OpenSans',
-        primaryColor: const Color(0xFF46A4E4),
-        accentColor: const Color(0xFF68B9A8),
+        primaryColor: const Color(0xFF3065C3), // blue
+        accentColor: const Color(0xFF52B950), // green
+        backgroundColor: const Color(0XFFF7F6FB), // grey
       ),
       home: Home(),
     );

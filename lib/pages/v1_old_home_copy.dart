@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:WaveCheck/models/user.dart';
-import 'package:WaveCheck/pages/new_post.dart';
-import 'package:WaveCheck/pages/profile.dart';
+import 'package:WaveCheck/pages/new_goal.dart';
 import 'package:WaveCheck/pages/goals_feed.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -109,12 +108,7 @@ class _HomeState extends State<Home> {
               onTap: () => {},
             ),
             ListTile(
-              onTap: () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Profile(currentUser.id, currentUser.first_name + ' ' + currentUser.last_name)),
-                )
-              },
+              onTap: () => {},
               leading: Icon(Icons.verified_user),
               title: Text('Profile'),
             ),
@@ -148,12 +142,7 @@ class _HomeState extends State<Home> {
           IconButton(
             tooltip: 'My Account',
             icon: const Icon(Icons.account_circle),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Profile(currentUser.id, currentUser.first_name + ' ' + currentUser.last_name)),
-              );
-            },
+            onPressed: () {},
           ),
         ],
       ),

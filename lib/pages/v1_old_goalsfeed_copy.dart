@@ -45,13 +45,9 @@ class _GoalsFeedState extends State<GoalsFeed> {
 
         List<Widget> goalsFormatted = new List<Widget>();
         for (var i = 0; i < snapshot.data.documents.length; i++) {
-            var goalID = snapshot.data.documents[i].documentID;
-            var goalName = snapshot.data.documents[i]['goal_string'];
-            var userID = snapshot.data.documents[i]['fk_user_id'];
-            var imageUrl = snapshot.data.documents[i]['urls'][0];
-            var completed = snapshot.data.documents[i]['completed'];
+            var doc = snapshot.data.documents[i];
             
-            goalsFormatted.add(GoalsItem(goalID, goalName, userID, imageUrl, completed));
+            goalsFormatted.add(GoalsItem(doc.documentID, doc['goal_string'], doc['fk_user_id'], doc['urls'][0], doc['timestamp'], doc['completed'], doc['likes'], widget.currentUser));
 
         }
 

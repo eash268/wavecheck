@@ -1,9 +1,8 @@
+import 'package:WaveCheck/models/user.dart';
 import 'package:WaveCheck/pages/upload.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:WaveCheck/pages/full_post.dart';
-import 'package:WaveCheck/pages/profile.dart';
 import 'package:WaveCheck/widgets/progress.dart';
 
 final goalsRef = Firestore.instance.collection('goals');
@@ -15,7 +14,9 @@ class FullGoalsItem extends StatelessWidget {
   final String goalUserID;
   final String goalImageURL;
   final bool completed;
-  const FullGoalsItem(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
+  final User currentUser;
+  
+  const FullGoalsItem(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed, this.currentUser);
 
   _showCompleteButton(context) {
     return FlatButton(
@@ -30,7 +31,7 @@ class FullGoalsItem extends StatelessWidget {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Upload()),
+          MaterialPageRoute(builder: (context) => Upload(this.goalID, currentUser)),
         );
       },
       child: Row(
@@ -288,24 +289,14 @@ class _FullGoalUserHeaderState extends State<FullGoalUserHeader> {
 
         return ListTile(
           leading: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Profile(goalUserID, name)),
-              );
-            },
+            onTap: () {},
             child: CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor,
               backgroundImage: NetworkImage(profilePic),
             ),
           ),
           title: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Profile(goalUserID, name)),
-              );
-            },
+            onTap: () {},
             child: Text(titleString),
           ),
           subtitle: Text('5 mins ago'),

@@ -1,7 +1,8 @@
+import 'package:WaveCheck/models/user.dart';
 import 'package:WaveCheck/widgets/full_goal_tile.dart';
+import 'package:WaveCheck/widgets/goal_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:WaveCheck/widgets/goal_tile.dart';
 
 final goalsRef = Firestore.instance.collection('goals');
 
@@ -10,23 +11,18 @@ class FullPost extends StatefulWidget {
   final String goalName;
   final String goalUserID;
   final String goalImageURL;
+  final Timestamp timestamp;
   final bool completed;
+  final List goalLikes;
+  final User currentUser;
 
-  const FullPost(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
+  const FullPost(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.timestamp, this.completed, this.goalLikes, this.currentUser);
 
   @override
-  _FullPostState createState() => _FullPostState(goalID, goalName, goalUserID, goalImageURL, completed);
+  _FullPostState createState() => _FullPostState();
 }
 
 class _FullPostState extends State<FullPost> {
-  final String goalID;
-  final String goalName;
-  final String goalUserID;
-  final String goalImageURL;
-  final bool completed;
-
-  _FullPostState(this.goalID, this.goalName, this.goalUserID, this.goalImageURL, this.completed);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +50,7 @@ class _FullPostState extends State<FullPost> {
             margin: EdgeInsets.only(top: 12.0),
             child: Column(
               children: <Widget>[
-                FullGoalsItem(goalID, goalName, goalUserID, goalImageURL, completed)
+                GoalsItem(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser),
               ],
             ),
           )

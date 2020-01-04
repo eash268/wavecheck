@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:WaveCheck/models/user.dart';
-import 'package:WaveCheck/pages/new_post.dart';
+import 'package:WaveCheck/pages/new_goal.dart';
 import 'package:WaveCheck/pages/goals_feed.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -123,6 +123,20 @@ class _HomeState extends State<Home> {
                 );
               },
             ),
+            /*
+            IconButton(
+              tooltip: 'Log Out',
+              icon: Icon(
+                Icons.close, 
+                color: Colors.red[600],
+                size: 30.0,
+              ),
+              onPressed: () {
+                logout();
+              },
+            ),
+            */
+            
           ],
         ),
       ),
@@ -166,7 +180,7 @@ class _HomeState extends State<Home> {
                 padding: EdgeInsets.all(15.0),
                 splashColor: Colors.blue[200],
                 shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(30.0),
                 ),
                 onPressed: login,
                 child: Text(
