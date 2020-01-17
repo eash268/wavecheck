@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:WaveCheck/models/user.dart';
 import 'package:WaveCheck/widgets/progress.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as Im;
 import 'package:uuid/uuid.dart';
+
 
 final goalsRef = Firestore.instance.collection('goals');
 final StorageReference storageRef = FirebaseStorage.instance.ref();
@@ -33,7 +35,7 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
     Navigator.pop(context);
     File file = await ImagePicker.pickImage(
       source: ImageSource.camera,
-      maxHeight: 675,
+      //maxHeight: 675,
       maxWidth: 960,
     );
     setState(() {
@@ -71,34 +73,89 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
     );
   }
 
-  Container buildSplashScreen() {
-    return Container(
-      color: Theme.of(context).primaryColor.withOpacity(1.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Image.asset('assets/images/camera.png', height: 260.0),
-          Padding(
-            padding: EdgeInsets.only(top: 20.0),
-            child: RaisedButton(
-              color: const Color(0xFF3cba54),
-              textColor: Colors.white,
-              padding: EdgeInsets.all(12.0),
-              splashColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Text(
-                "Upload Image",
+  Scaffold buildSplashScreen() {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bg_upload.jpeg'),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.srgbToLinearGamma()
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(height: 400.0,),
+            Container(
+              width: 1000,
+              margin: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: Text('By posting a picture of you achieving your goals, you can motivate your whole club to achieve their goals as well:',
+                textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22.0,
+                  fontFamily: 'Raleway',
+                  fontSize: 30.0,
+                  color: Colors.green[50],
                 ),
               ),
-              onPressed: () => selectImage(context)),
-          ),
-        ],
-      ),
+            ),
+            SizedBox(height: 50.0,),
+            Padding(
+              padding: EdgeInsets.only(top: 0.0, left: 20.0, right: 20.0),
+              child: RaisedButton(
+                textColor: Colors.blue[50],
+                color: Colors.blue,
+                padding: EdgeInsets.all(10.0),
+                splashColor: Colors.blue[100],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                onPressed: () {
+                  selectImage(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "Upload an Image",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 12.0,),
+            Padding(
+              padding: EdgeInsets.only(top: 0.0, left: 20.0, right: 20.0),
+              child: RaisedButton(
+                textColor: Colors.grey[50],
+                color: Colors.grey,
+                padding: EdgeInsets.all(10.0),
+                splashColor: Colors.grey[100],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "Done",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      )
     );
   }
 
@@ -187,14 +244,11 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
           Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: Center(
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: FileImage(file),
-                    ),
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: FileImage(file),
                   ),
                 ),
               ),

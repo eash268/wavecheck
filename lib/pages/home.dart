@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -92,12 +93,12 @@ class _HomeState extends State<Home> {
         child: AppBar(
           centerTitle: false,
           backgroundColor: Colors.white,
-          elevation: 0.0,
+          elevation: 1.0,
           bottomOpacity: 0.0,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text("It's goal time, " + currentUser.first_name + ".",
+              Text("Eash's Beta Testers",// + currentUser.first_name + ".",
                 style: TextStyle(
                   fontSize: 28.0,
                   fontFamily: 'Roboto',
@@ -123,19 +124,19 @@ class _HomeState extends State<Home> {
                 );
               },
             ),
-            /*
+
             IconButton(
               tooltip: 'Log Out',
               icon: Icon(
                 Icons.close, 
-                color: Colors.red[600],
+                color: Colors.grey,
                 size: 30.0,
               ),
               onPressed: () {
                 logout();
               },
             ),
-            */
+
             
           ],
         ),
@@ -146,41 +147,43 @@ class _HomeState extends State<Home> {
 
   Scaffold buildUnAuthScreen() {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        bottomOpacity: 0.0,
-        elevation: 0.0,
-        title: Text('WaveCheck',
-          style: TextStyle(
-            fontFamily: 'Pacifico',
-            fontSize: 24.0,
-            color: Theme.of(context).primaryColor,
+      body: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bg.jpeg'),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.srgbToLinearGamma()
           ),
         ),
-      ),
-      body: Container(
-        margin: const EdgeInsets.only(left: 35.0, right: 35.0, bottom: 35.0),
-        alignment: Alignment.center,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text('Setting goals is the first step in turning the invisible into the visible.',
-              style: TextStyle(
-                fontFamily: 'OpenSans',
-                fontSize: 30.0,
-              ),
-            ),
+            SizedBox(height: 400.0),
             Container(
               width: 1000,
-              padding: EdgeInsets.only(top: 35.0),
-              child: FlatButton(
-                color: Theme.of(context).primaryColor,
-                textColor: Colors.white,
-                padding: EdgeInsets.all(15.0),
-                splashColor: Colors.blue[200],
+              margin: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: Text('Setting goals is the first step in turning the invisible into the visible.',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontFamily: 'Raleway',
+                  fontSize: 40.0,
+                  color: Colors.blue[50],
+                ),
+              ),
+            ),
+            SizedBox(height: 50.0),
+            Container(
+              width: 1000,
+              margin: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: RaisedButton(
+                textColor: Colors.blue[50],
+                color: Colors.blue,
+                padding: EdgeInsets.all(10.0),
+                splashColor: Colors.blue[100],
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(5.0),
                 ),
                 onPressed: login,
                 child: Text(
