@@ -1,3 +1,4 @@
+import 'package:WaveCheck/pages/home.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,25 @@ class _PostScreenState extends State<PostScreen> {
   submit() async {
     _formKey.currentState.save();
 
-    // 3) get username from create account, use it to make new user document in users collection
+    if (goal.replaceAll(new RegExp(r"\s+\b|\b\s"), "") != '') {
+      await goalsRef.document().setData({
+        "fk_user_id": widget.userID,
+        "goal_string": goal,
+        "timestamp": timestamp,
+        "completed": false,
+        "urls": [""],
+        "likes": [],
+        "joins": [],
+      });
+
+      Navigator.pushAndRemoveUntil(context,   
+        MaterialPageRoute(builder: (BuildContext context) => Home()),    
+        ModalRoute.withName('/')
+      ); 
+    }
+  }
+
+  submitPreset(goal) async {
     await goalsRef.document().setData({
       "fk_user_id": widget.userID,
       "goal_string": goal,
@@ -31,26 +50,58 @@ class _PostScreenState extends State<PostScreen> {
       "joins": [],
     });
 
-    Navigator.pop(context);
+    Navigator.pushAndRemoveUntil(context,   
+      MaterialPageRoute(builder: (BuildContext context) => Home()),    
+      ModalRoute.withName('/')
+    ); 
+  }
+
+  _showJoinConfirm(goal) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text("Want to add \"$goal\" to your own goals?"),
+          children: <Widget>[
+            SimpleDialogOption(
+                child: Text("Yes I would"), 
+                onPressed: () {
+                  submitPreset(goal);
+                }
+            ),
+            SimpleDialogOption(
+              child: Text("No, thanks"),
+              onPressed: () => Navigator.pop(context),
+            )
+          ],
+        );
+      },
+    );
   }
 
   newGoalSuggestions(text, subtext, img) {
-    return Container(
-      margin: EdgeInsets.only(left: 16.0, right: 16.0),
-      child: Card(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.transparent,
-                backgroundImage: CachedNetworkImageProvider(img),
+    return GestureDetector(
+      onTap: () {
+        _showJoinConfirm(text);
+      },
+      child: Container(
+        margin: EdgeInsets.only(left: 16.0, right: 16.0),
+        child: Card(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  backgroundImage: CachedNetworkImageProvider(img),
+                  radius: 28.0,
+                ),
+                title: Text(text),
+                subtitle: Text(subtext),
               ),
-              title: Text(text),
-              subtitle: Text(subtext),
-            ),
-          ],
-        ),
+            ],
+          ),
+        )
       )
     );
   }
@@ -63,7 +114,7 @@ class _PostScreenState extends State<PostScreen> {
         preferredSize: Size.fromHeight(60.0),
         child: AppBar(
           bottomOpacity: 0.0,
-          elevation: 0.0,
+          elevation: 1.0,
           iconTheme: IconThemeData(
             color: Colors.black, //change your color here
           ),
@@ -71,7 +122,7 @@ class _PostScreenState extends State<PostScreen> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text("What do you want to get done?",
+              Text("New Goal",
                 style: TextStyle(
                   fontSize: 20.0,
                   fontFamily: 'Roboto',
@@ -88,8 +139,7 @@ class _PostScreenState extends State<PostScreen> {
         children: <Widget>[
           Container(
             color: Colors.white,
-            padding: EdgeInsets.only(left: 16.0, right: 16.0, top:20.0, bottom: 20.0),
-            margin: EdgeInsets.only(top:12.0),
+            padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 28.0, bottom: 20.0),
             child: Column(
               children: <Widget>[
                 Form(
@@ -107,10 +157,10 @@ class _PostScreenState extends State<PostScreen> {
                     width: 1000,
                     padding: EdgeInsets.only(top: 16.0),
                     child: FlatButton(
-                      color: Theme.of(context).primaryColor,
+                      color: Colors.blue,
                       textColor: Colors.blue[50],
-                      padding: EdgeInsets.all(9.0),
-                      splashColor: Colors.blue[200],
+                      splashColor: Colors.blue[100],
+                      padding: EdgeInsets.all(10.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(5.0),
                       ),
@@ -140,7 +190,7 @@ class _PostScreenState extends State<PostScreen> {
 
 
           Container(
-            margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 20.0, bottom: 16.0),
+            margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
             child: Text("If you want to be happier...", 
               style: TextStyle(
                 fontSize: 20.0,

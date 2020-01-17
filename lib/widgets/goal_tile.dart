@@ -1,4 +1,5 @@
 import 'package:WaveCheck/models/user.dart';
+import 'package:WaveCheck/pages/home.dart';
 import 'package:WaveCheck/pages/upload.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -29,6 +30,23 @@ class GoalsItem extends StatefulWidget {
 }
 
 class _GoalsItemState extends State<GoalsItem> {
+  _submitJoinGoal(goal) async {
+    await goalsRef.document().setData({
+      "fk_user_id": widget.currentUser.id,
+      "goal_string": goal,
+      "timestamp": DateTime.now(),
+      "completed": false,
+      "urls": [""],
+      "likes": [],
+      "joins": [],
+    });
+ 
+    Navigator.pushAndRemoveUntil(context,   
+      MaterialPageRoute(builder: (BuildContext context) => Home()),    
+      ModalRoute.withName('/')
+    ); 
+  }
+
   _showJoinConfirm(goal) {
     return showDialog(
       context: context,
@@ -38,7 +56,9 @@ class _GoalsItemState extends State<GoalsItem> {
           children: <Widget>[
             SimpleDialogOption(
                 child: Text("Yes I would"), 
-                onPressed: () {}
+                onPressed: () {
+                  _submitJoinGoal(goal);
+                }
             ),
             SimpleDialogOption(
               child: Text("No, thanks"),
@@ -60,9 +80,9 @@ class _GoalsItemState extends State<GoalsItem> {
         borderRadius: BorderRadius.circular(5.0),
       ),
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Upload(widget.goalID, widget.currentUser)),
+        Navigator.pushAndRemoveUntil(context,   
+          MaterialPageRoute(builder: (BuildContext context) => Upload(widget.goalID, widget.currentUser)),    
+          ModalRoute.withName('/')
         );
       },
       child: Row(
@@ -377,6 +397,11 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
         doc.reference.delete();
       }
     });
+
+    Navigator.pushAndRemoveUntil(context,   
+      MaterialPageRoute(builder: (BuildContext context) => Home()),    
+      ModalRoute.withName('/')
+    );
   }
   
   handleDeletePost(BuildContext parentContext) {
@@ -410,11 +435,11 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
         return SimpleDialog(
           title: Text("Actions:"),
           children: <Widget>[
-            SimpleDialogOption(
+            !currentUserOwnsPost? SimpleDialogOption(
               child: Text("Join this goal"), onPressed: () {
                 _showJoinConfirm(goalName);
               }
-            ),
+            ) : SizedBox(height: 0,),
             SimpleDialogOption(
               child: Text("Add a comment"), onPressed: () {
                 Navigator.push(
@@ -525,7 +550,7 @@ Widget makeLikeButton({isActive}) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.thumb_up, color: isActive ? const Color(0xFF2364CC) : Colors.grey, size: 18,),
+            Icon(Icons.favorite, color: isActive ? const Color(0xFF2364CC) : Colors.grey, size: 18,),
             SizedBox(width: 5,),
             Text("Like", style: TextStyle(color: isActive ? const Color(0xFF2364CC) : Colors.grey[600]),)
           ],

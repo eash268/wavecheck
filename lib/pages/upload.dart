@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:WaveCheck/models/user.dart';
+import 'package:WaveCheck/pages/home.dart';
 import 'package:WaveCheck/widgets/progress.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -35,8 +35,6 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
     Navigator.pop(context);
     File file = await ImagePicker.pickImage(
       source: ImageSource.camera,
-      //maxHeight: 675,
-      maxWidth: 960,
     );
     setState(() {
       this.file = file;
@@ -86,16 +84,16 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 400.0,),
+            SizedBox(height: 250.0,),
             Container(
               width: 1000,
               margin: const EdgeInsets.only(left: 20.0, right: 20.0),
-              child: Text('By posting a picture of you achieving your goals, you can motivate your whole club to achieve their goals as well:',
+              child: Text('By posting a picture when you achieve your goals, you can motivate your whole club to achieve their goals as well:',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontFamily: 'Raleway',
                   fontSize: 30.0,
-                  color: Colors.green[50],
+                  color: Colors.blue[50],
                 ),
               ),
             ),
@@ -205,6 +203,10 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
     createPostInFirestore(
       mediaUrl: mediaUrl,
     );
+    Navigator.pushAndRemoveUntil(context,   
+      MaterialPageRoute(builder: (BuildContext context) => Home()),    
+      ModalRoute.withName('/')
+    );
     setState(() {
       file = null;
       isUploading = false;
@@ -230,7 +232,7 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
             child: Text(
               "Post",
               style: TextStyle(
-                color: Color(0xFF46A4E4),
+                color: Colors.blue,
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
               ),
@@ -244,11 +246,14 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
           Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: FileImage(file),
+              child: AspectRatio(
+                aspectRatio: 1 / 0.6,
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: FileImage(file),
+                    ),
                   ),
                 ),
               ),

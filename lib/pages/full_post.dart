@@ -1,10 +1,10 @@
 import 'package:WaveCheck/models/user.dart';
 import 'package:WaveCheck/widgets/full_goal_tile.dart';
-import 'package:WaveCheck/widgets/goal_tile.dart';
+import 'package:WaveCheck/widgets/progress.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-final goalsRef = Firestore.instance.collection('goals');
+final commentsRef = Firestore.instance.collection('comments');
 
 class FullPost extends StatefulWidget {
   final String goalID;
@@ -23,6 +23,36 @@ class FullPost extends StatefulWidget {
 }
 
 class _FullPostState extends State<FullPost> {
+  makeCommentRow(commentID, userID, comment, timestamp, likes) {
+    return ListTile(
+      leading: FlutterLogo(),
+      title: Text(comment),
+      trailing: Icon(Icons.favorite),
+    );
+  }
+
+  getComments() {
+    return FutureBuilder(
+      future: commentsRef.where('fk_goal_id', isEqualTo: widget.goalID).getDocuments(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return circularProgress();
+        }
+
+        List<Widget> comments = new List<Widget>();
+        for (var i = 0; i < snapshot.data.documents.length; i++) {
+            var doc = snapshot.data.documents[i];
+            comments.add(makeCommentRow(doc.documentID, doc['fk_user_id'], doc['comment'], doc['timestamp'], doc['likes']));
+            comments.add(Divider());
+        }
+
+        return Column(
+          children: comments,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +80,8 @@ class _FullPostState extends State<FullPost> {
             margin: EdgeInsets.only(top: 12.0),
             child: Column(
               children: <Widget>[
-                GoalsItem(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser),
+                FullGoalsItem(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser),
+                //getComments(),
               ],
             ),
           )

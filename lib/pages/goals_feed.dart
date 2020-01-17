@@ -5,6 +5,7 @@ import 'package:empty_widget/empty_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:WaveCheck/widgets/goal_tile.dart';
 import 'package:WaveCheck/widgets/progress.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 final goalsRef = Firestore.instance.collection('goals');
 final usersRef = Firestore.instance.collection('users');
@@ -161,38 +162,40 @@ class _GoalsFeedState extends State<GoalsFeed> {
   }
 
   buildUsersRow(usersRef) {
-    return Column(
+    return ListView(
       children: <Widget>[
+        SizedBox(
+          height: 14.0,
+        ),
         FutureBuilder(
           future: usersRef.getDocuments(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return Container(
-                padding: EdgeInsets.only(top: 0.0),
-                margin: EdgeInsets.only(bottom: 20.0),
-                child: circularProgress()
-              );
+              return circularProgress();
             }
 
             List<Widget> users = new List<Widget>();
-            users.add(refreshButton());
+            //users.add(refreshButton());
             for (var i = 0; i < snapshot.data.documents.length; i++) {
                 var doc = snapshot.data.documents[i];
                 users.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
             }
-            users.add(addNewMemberButton());
+            //users.add(addNewMemberButton());
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: users
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: users
+              )
             );
           },
         ),
         Column(
           children: <Widget>[
             Container(
-            margin: EdgeInsets.only(left: 15.0,
-             right: 15.0, top: 100.0),
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(left: 25.0, right: 25.0, top: 75.0),
               child: EmptyListWidget(
                 title: 'No Goals Yet',
                 subTitle: 'Tap the + to get started.',
@@ -209,9 +212,13 @@ class _GoalsFeedState extends State<GoalsFeed> {
 
   buildTimeline() {
     if (goals == null) {
-      return Container(
-        margin: EdgeInsets.only(top: 10.0),
-        child: circularProgress(),
+      return ListView(
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(top: 10.0),
+            child: circularProgress(),
+          ),
+        ]
       );
     } else if (goals.isEmpty) {
       return buildUsersRow(usersRef);
@@ -229,12 +236,12 @@ class _GoalsFeedState extends State<GoalsFeed> {
               }
 
               List<Widget> users = new List<Widget>();
-              users.add(refreshButton());
+              //users.add(refreshButton());
               for (var i = 0; i < snapshot.data.documents.length; i++) {
                   var doc = snapshot.data.documents[i];
                   users.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
               }
-              users.add(addNewMemberButton());
+              //users.add(addNewMemberButton());
 
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -274,9 +281,12 @@ class _GoalsFeedState extends State<GoalsFeed> {
   
   @override
   Widget build(context) {
-    return RefreshIndicator(
+    return LiquidPullToRefresh(
         onRefresh: () => _getTimeline(), 
-        child: buildTimeline()
+        child: buildTimeline(),
+        color: Colors.blue,
+        backgroundColor: Colors.white,
+        showChildOpacityTransition: false,
     );
   }
 }
