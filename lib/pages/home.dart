@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +65,7 @@ class _HomeState extends State<Home> {
         "id": user.id,
         "first_name": user.displayName.split(' ')[0],
         "last_name": user.displayName.split(' ')[1],
-        "profile_pic": user.photoUrl,
+        "profile_pic": (user.photoUrl != '' && user.photoUrl != null)? user.photoUrl : "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fc-sf.smule.com%2Fz0%2Faccount%2Ficon%2Fv4_defpic.png&f=1&nofb=1",
         "email": user.email,
         "bio": "",
         "timestamp": timestamp
@@ -89,7 +90,7 @@ class _HomeState extends State<Home> {
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.0),
+        preferredSize: Size.fromHeight(60),
         child: AppBar(
           leading: null,
           automaticallyImplyLeading: false,
@@ -102,13 +103,26 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               GestureDetector(
                 onTap: () {},
-                child: Text("Beta Testers Club",// + currentUser.first_name + ".",
-                  style: TextStyle(
-                    fontSize: 28.0,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text("Beta Testers Club",
+                      style: TextStyle(
+                        fontSize: 28.0,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black
+                      ),
+                    ),
+                    /*
+                    Text("What are your goals, " + currentUser.first_name + "?",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                    */
+                  ],
                 ),
               )
             ],
@@ -118,7 +132,7 @@ class _HomeState extends State<Home> {
               tooltip: 'Add New Goal',
               icon: Icon(
                 Icons.add_circle_outline, 
-                color: Colors.grey[600],
+                color: Colors.grey[700],
                 size: 30.0,
               ),
               onPressed: () {
@@ -126,6 +140,18 @@ class _HomeState extends State<Home> {
                   context,
                   MaterialPageRoute(builder: (context) => PostScreen(currentUser.id)),
                 );
+              },
+            ),
+
+            IconButton(
+              tooltip: 'Menu',
+              icon: Icon(
+                Icons.menu, 
+                color: Colors.grey[700],
+                size: 30.0,
+              ),
+              onPressed: () {
+                _scaffoldKey.currentState.openEndDrawer();
               },
             ),
             
@@ -136,66 +162,79 @@ class _HomeState extends State<Home> {
       endDrawer: Drawer(
         elevation: 20.0,
         child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-                UserAccountsDrawerHeader(
-                    accountName: Text(currentUser.first_name + ' ' + currentUser.last_name, 
-                      style: TextStyle(
-                        color: Colors.white
-                      ),
-                    ),
-                    accountEmail: Text(currentUser.email, 
-                      style: TextStyle(
-                        color: Colors.blue[50]
-                      ),
-                    ),
-                    currentAccountPicture: Image.network(currentUser.profile_pic),
-                    decoration: BoxDecoration(color: Colors.blue),
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountName: Text(currentUser.first_name + ' ' + currentUser.last_name, 
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Roboto',
+                  fontSize: 20.0
                 ),
-                ListTile(
-                    leading: Icon(Icons.add_circle_outline),
-                    title: Text('Add a New Goal'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => PostScreen(currentUser.id)),
-                      );
-                    },
+              ),
+              accountEmail: Text(currentUser.email, 
+                style: TextStyle(
                 ),
-                Divider(
-                    height: 2.0,
-                ),
-                ListTile(
-                    leading: Icon(Icons.account_circle),
-                    title: Text('My Dashboard'),
-                    onTap: () {
-                        Navigator.pop(context);
-                    },
-                ),
-                Divider(
-                    height: 2.0,
-                ),
-                ListTile(
-                    leading: Icon(Icons.share),
-                    title: Text('Share GoalClub'),
-                    onTap: () {
-                        Navigator.pop(context);
-                        Share.share("GoalClub is this super cool new app that allows you to track your daily goals with your friends. Check it out!");
-                    },
-                ),
-                Divider(
-                    height: 2.0,
-                ),
-                ListTile(
-                    leading: Icon(Icons.close),
-                    title: Text('Sign Out'),
-                    onTap: () {
-                        Navigator.pop(context);
-                        logout();
-                    },
+              ),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: CachedNetworkImageProvider(currentUser.profile_pic),
+              ),
+              decoration: BoxDecoration(
+                image: const DecorationImage(
+                  colorFilter: ColorFilter.srgbToLinearGamma(),
+                  image: AssetImage('assets/images/bg_drawer.jpg'),
+                  fit: BoxFit.cover,
                 )
-            ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.add_circle_outline),
+              title: Text('Add a New Goal'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PostScreen(currentUser.id)),
+                );
+              },
+            ),
+            Divider(
+              height: 2.0,
+              color: Colors.grey[350],
+            ),
+            ListTile(
+              leading: Icon(Icons.account_circle),
+              title: Text('My Dashboard'),
+              onTap: () {
+                  Navigator.pop(context);
+              },
+            ),
+            Divider(
+              height: 2.0,
+              color: Colors.grey[350],
+            ),
+            ListTile(
+              leading: Icon(Icons.share),
+              title: Text('Share GoalClub'),
+              onTap: () {
+                  Navigator.pop(context);
+                  Share.share("GoalClub is this super cool new app that allows you to track your daily goals with your friends. Check it out!");
+              },
+            ),
+            Divider(
+              height: 2.0,
+              color: Colors.grey[350],
+            ),
+            ListTile(
+              leading: Icon(Icons.close),
+              title: Text('Sign Out'),
+              onTap: () {
+                  Navigator.pop(context);
+                  logout();
+              },
+            )
+          ],
         )
       ),
     );
@@ -207,7 +246,8 @@ class _HomeState extends State<Home> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/bg.jpeg'),
+            image: AssetImage('assets/images/bg2.jpeg'),
+            //image: CachedNetworkImageProvider('https://images.unsplash.com/photo-1512850183-6d7990f42385?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80'),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.srgbToLinearGamma()
           ),
@@ -225,7 +265,7 @@ class _HomeState extends State<Home> {
                 style: TextStyle(
                   fontFamily: 'Raleway',
                   fontSize: 40.0,
-                  color: Colors.blue[50],
+                  color: Colors.white,
                 ),
               ),
             ),

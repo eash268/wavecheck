@@ -35,7 +35,8 @@ class _GoalsFeedState extends State<GoalsFeed> {
         .getDocuments();
 
     List<GoalsItem> goals = snapshot.documents.map(
-      (doc) => GoalsItem(doc.documentID, doc['goal_string'], doc['fk_user_id'], doc['urls'][0], doc['timestamp'], doc['completed'], doc['likes'], widget.currentUser)).toList();
+      (doc) => GoalsItem(doc.documentID, doc['goal_string'], doc['fk_user_id'], doc['urls'][0], doc['timestamp'], doc['completed'], doc['likes'], widget.currentUser)
+    ).toList();
 
     setState(() {
       this.goals = goals;
@@ -51,7 +52,7 @@ class _GoalsFeedState extends State<GoalsFeed> {
       (doc) => GoalsItem(doc.documentID, doc['goal_string'], doc['fk_user_id'], doc['urls'][0], doc['timestamp'], doc['completed'], doc['likes'], widget.currentUser)).toList();
 
     setState(() {
-      this.goals = goals;
+      this.goals = goals.sublist(0, 10);
     });
   }
 
@@ -125,10 +126,44 @@ class _GoalsFeedState extends State<GoalsFeed> {
     );
   }
 
-  userProfilePicture(profile_id, profile_name, profile_pic) {
+  everyoneButton() {
     return GestureDetector(
       onTap: () {
-        _filterPostsByUser(profile_id);
+        _getTimeline();
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(left: 16.0, right: 5.0),
+            child: Icon(
+              Icons.group,
+              color: Colors.grey[700],
+              size: 62,
+            ),
+          ),
+          
+          Container(
+            margin: EdgeInsets.only(left: 16.0, right: 5.0, top: 0.0),
+            child: Text(
+              "Everyone",
+              style: TextStyle(
+                fontSize: 13.0,
+              ),
+            ),
+          ),
+          
+
+        ],
+      ),
+    );
+  }
+
+  userProfilePicture(profileId, profileName, profilePic) {
+    return GestureDetector(
+      onTap: () {
+        _filterPostsByUser(profileId);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -138,7 +173,7 @@ class _GoalsFeedState extends State<GoalsFeed> {
             margin: EdgeInsets.only(left: 16.0, right: 5.0),
             child: CircleAvatar(
               //backgroundColor: Theme.of(context).primaryColor,
-              backgroundImage: CachedNetworkImageProvider(profile_pic),
+              backgroundImage: CachedNetworkImageProvider(profilePic),
               minRadius: 30.0,
             ),
           ),
@@ -146,11 +181,11 @@ class _GoalsFeedState extends State<GoalsFeed> {
           Container(
             margin: EdgeInsets.only(left: 16.0, right: 5.0, top: 4.0),
             child: Text(
-              profile_name.split(" ")[0],
+              profileName.split(" ")[0],
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12.0,
-                color: Colors.grey[700]
+                fontSize: 13.0,
+                //color: Colors.black
               ),
             ),
           ),
@@ -173,13 +208,20 @@ class _GoalsFeedState extends State<GoalsFeed> {
             if (!snapshot.hasData) {
               return circularProgress();
             }
-
-            List<Widget> users = new List<Widget>();
+            
+            List<Widget> currentUser = new List<Widget>();
+            List<Widget> otherUsers = new List<Widget>();
             //users.add(refreshButton());
+            //users.add(addNewMemberButton());
             for (var i = 0; i < snapshot.data.documents.length; i++) {
                 var doc = snapshot.data.documents[i];
-                users.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
+                if (widget.currentUser.id == doc.documentID) {
+                  currentUser.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
+                } else {
+                  otherUsers.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
+                }
             }
+            List<Widget> users = currentUser + otherUsers;
             //users.add(addNewMemberButton());
 
             return SingleChildScrollView(
@@ -235,13 +277,21 @@ class _GoalsFeedState extends State<GoalsFeed> {
                 return circularProgress();
               }
 
-              List<Widget> users = new List<Widget>();
-              //users.add(refreshButton());
+              List<Widget> allUsers = new List<Widget>();
+              List<Widget> currentUser = new List<Widget>();
+              List<Widget> otherUsers = new List<Widget>();
+
               for (var i = 0; i < snapshot.data.documents.length; i++) {
                   var doc = snapshot.data.documents[i];
-                  users.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
+                  if (widget.currentUser.id == doc.documentID) {
+                    currentUser.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
+                  } else {
+                    otherUsers.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
+                  }
               }
-              //users.add(addNewMemberButton());
+
+              //allUsers.add(everyoneButton());
+              List<Widget> users = allUsers + currentUser + otherUsers;
 
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,

@@ -88,7 +88,7 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
             Container(
               width: 1000,
               margin: const EdgeInsets.only(left: 20.0, right: 20.0),
-              child: Text('By posting a picture when you achieve your goals, you can motivate your whole club to achieve their goals as well:',
+              child: Text('By posting a picture when you achieve your goals, you can motivate everyone to live their best lives as well:',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontFamily: 'Raleway',

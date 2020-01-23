@@ -25,11 +25,9 @@ class _PostScreenState extends State<PostScreen> {
       await goalsRef.document().setData({
         "fk_user_id": widget.userID,
         "goal_string": goal,
-        "timestamp": timestamp,
+        "timestamp": DateTime.now(),
         "completed": false,
         "urls": [""],
-        "likes": [],
-        "joins": [],
       });
 
       Navigator.pushAndRemoveUntil(context,   
@@ -43,11 +41,9 @@ class _PostScreenState extends State<PostScreen> {
     await goalsRef.document().setData({
       "fk_user_id": widget.userID,
       "goal_string": goal,
-      "timestamp": timestamp,
+      "timestamp": DateTime.now(),
       "completed": false,
       "urls": [""],
-      "likes": [],
-      "joins": [],
     });
 
     Navigator.pushAndRemoveUntil(context,   
@@ -116,7 +112,7 @@ class _PostScreenState extends State<PostScreen> {
           bottomOpacity: 0.0,
           elevation: 1.0,
           iconTheme: IconThemeData(
-            color: Colors.black, //change your color here
+            color: Colors.grey[700], //change your color here
           ),
           backgroundColor: Colors.white,
           title: Column(

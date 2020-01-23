@@ -2,7 +2,6 @@ import 'package:WaveCheck/models/user.dart';
 import 'package:WaveCheck/pages/home.dart';
 import 'package:WaveCheck/pages/upload.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:WaveCheck/pages/full_post.dart';
@@ -11,7 +10,9 @@ import 'package:share/share.dart';
 import 'package:time_ago_provider/time_ago_provider.dart';
 
 final goalsRef = Firestore.instance.collection('goals');
+final likesRef = Firestore.instance.collection('likes');
 final usersRef = Firestore.instance.collection('users');
+final joinsRef = Firestore.instance.collection('joins');
 
 class GoalsItem extends StatefulWidget {
   final String goalID;
@@ -30,15 +31,27 @@ class GoalsItem extends StatefulWidget {
 }
 
 class _GoalsItemState extends State<GoalsItem> {
-  _submitJoinGoal(goal) async {
+  String numLikes = "...";
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  _submitJoinGoal() async {
     await goalsRef.document().setData({
       "fk_user_id": widget.currentUser.id,
-      "goal_string": goal,
+      "goal_string": widget.goalName,
       "timestamp": DateTime.now(),
       "completed": false,
       "urls": [""],
-      "likes": [],
       "joins": [],
+    });
+
+    await joinsRef.document().setData({
+      "fk_goal_id": widget.goalID,
+      "fk_user_id": widget.currentUser.id,
+      "profile_pic": widget.currentUser.profile_pic,
     });
  
     Navigator.pushAndRemoveUntil(context,   
@@ -57,7 +70,7 @@ class _GoalsItemState extends State<GoalsItem> {
             SimpleDialogOption(
                 child: Text("Yes I would"), 
                 onPressed: () {
-                  _submitJoinGoal(goal);
+                  _submitJoinGoal();
                 }
             ),
             SimpleDialogOption(
@@ -162,27 +175,52 @@ class _GoalsItemState extends State<GoalsItem> {
     );
   }
 
-  _numLikes(likes) {
-    int count = 0;
-    if (likes == null) {
-      count = -1;
-    } else {
-      likes.forEach((val) {
-        if (val != '') {
-          count += 1;
-        }
-      });
-    }
+  joinRow() {
+    return Row(
+      children: <Widget>[
+        Text("Joined By: ",
+          style: TextStyle(
+            fontSize: 14.0,
+            //color: Colors.grey[700]
+          ),
+        ),
+        FutureBuilder(
+          future: joinsRef.where('fk_goal_id', isEqualTo: widget.goalID).getDocuments(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Text("");
+            }
 
-    if (count == -1 || count == 0) {
-      return "0 people like this goal";
-    } else if (count == 1) {
-      return "1 person likes this goal";
-    } else if (count > 1) {
-      return count.toString() + " people like this goal";
-    }
-
-    return "";
+            List<Widget> joiners = new List<Widget>();
+            for (var i = 0; i < snapshot.data.documents.length; i++) {
+                var doc = snapshot.data.documents[i];
+                joiners.add(
+                  CircleAvatar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundImage: CachedNetworkImageProvider(doc['profile_pic']),
+                    radius: 9.0,
+                  )
+                );
+            }
+            
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: joiners
+              )
+            );
+          },
+        ),
+        Text("",
+          style: TextStyle(
+            fontSize: 14.0,
+            //fontStyle: FontStyle.italic,
+            color: Colors.grey[700]
+          ),
+        ),
+      ],
+    );
   }
   
 
@@ -195,7 +233,7 @@ class _GoalsItemState extends State<GoalsItem> {
         shape: RoundedRectangleBorder(
           borderRadius: new BorderRadius.circular(0.0),
         ),
-        margin: EdgeInsets.only(left: 0.0, right: 0.0, bottom: 12.0),
+        margin: EdgeInsets.only(left: 0.0, right: 0.0, bottom: 10.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -269,59 +307,47 @@ class _GoalsItemState extends State<GoalsItem> {
                 children: <Widget>[
                   Column(
                     children: <Widget>[
-                      Text(_numLikes(widget.goalLikes),
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          //fontStyle: FontStyle.italic,
-                          color: Colors.grey[600]
-                        ),
+                      StreamBuilder(
+                        stream: likesRef.where('fk_goal_id', isEqualTo: widget.goalID).snapshots(),
+                        builder: (context, snapshot) {
+
+                          if (!snapshot.hasData) {
+                            return Text("");
+                          }
+
+                          var count = snapshot.data.documents.length;
+                          if (count == -1 || count == 0) {
+                            numLikes = "0 people love this goal";
+                          } else if (count == 1) {
+                            numLikes = "1 person loves this goal";
+                          } else if (count > 1) {
+                            numLikes = count.toString() + " people love this goal";
+                          }
+
+                          return Text(numLikes,
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              //color: Colors.grey[700]
+                            ),
+                          );
+
+                        },
                       )
                     ],
                   ),
-                  Row(
-                    children: <Widget>[
-                      Text("Joined By: ",
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          //fontStyle: FontStyle.italic,
-                          color: Colors.grey[600]
-                        ),
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        backgroundImage: NetworkImage("https://picsum.photos/200"),
-                        radius: 9.0,
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        backgroundImage: NetworkImage("https://picsum.photos/300"),
-                        radius: 9.0,
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        backgroundImage: NetworkImage("https://picsum.photos/400"),
-                        radius: 9.0,
-                      ),
-                      Text(" +1",
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          //fontStyle: FontStyle.italic,
-                          color: Colors.grey[600]
-                        ),
-                      ),
-                    ],
-                  ),
+                  joinRow(),
 
                 ],
               ),
             ),
-
+            Divider(height: 0, color: Colors.grey[350], indent: 12.0, endIndent: 12.0,),
+            SizedBox(height: 6.0,),
             Container(
-              margin: EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0, top: 0.0),
+              margin: EdgeInsets.only(left: 12.0, right: 12.0, bottom: 6.0, top: 0.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  makeLikeButton(isActive: false),
+                  LikeButton(widget.goalID, widget.currentUser),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -329,7 +355,7 @@ class _GoalsItemState extends State<GoalsItem> {
                         MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
                       );
                     },
-                    child: makeCommentButton(),
+                    child: makeCommentButton(widget.goalID),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -366,6 +392,29 @@ class GoalUserHeader extends StatefulWidget {
 }
 
 class _GoalUserHeaderState extends State<GoalUserHeader> {
+  _submitJoinGoal(goal) async {
+    await goalsRef.document().setData({
+      "fk_user_id": widget.currentUser.id,
+      "goal_string": goal,
+      "timestamp": DateTime.now(),
+      "completed": false,
+      "urls": [""],
+      "likes": [],
+      "joins": [],
+    });
+
+    await joinsRef.document().setData({
+      "fk_goal_id": widget.goalID,
+      "fk_user_id": widget.currentUser.id,
+      "profile_pic": widget.currentUser.profile_pic,
+    });
+ 
+    Navigator.pushAndRemoveUntil(context,   
+      MaterialPageRoute(builder: (BuildContext context) => Home()),    
+      ModalRoute.withName('/')
+    ); 
+  }
+
   _showJoinConfirm(goal) {
     return showDialog(
       context: context,
@@ -375,7 +424,9 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
           children: <Widget>[
             SimpleDialogOption(
                 child: Text("Yes I would"), 
-                onPressed: () {}
+                onPressed: () {
+                  _submitJoinGoal(goal);
+                }
             ),
             SimpleDialogOption(
               child: Text("No, thanks"),
@@ -439,7 +490,14 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
               child: Text("Join this goal"), onPressed: () {
                 _showJoinConfirm(goalName);
               }
-            ) : SizedBox(height: 0,),
+            ) : SimpleDialogOption(
+              child: Text("Complete this goal"), onPressed: () {
+                Navigator.push(
+                  context,   
+                  MaterialPageRoute(builder: (BuildContext context) => Upload(widget.goalID, widget.currentUser))
+                );
+              }
+            ),
             SimpleDialogOption(
               child: Text("Add a comment"), onPressed: () {
                 Navigator.push(
@@ -459,6 +517,12 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
                   handleDeletePost(context);
                 }
             ) : SizedBox(height: 0,),
+            SimpleDialogOption(
+              child: Text("Cancel"), 
+              onPressed: () {
+                Navigator.pop(context);
+              }
+            ),
           ],
         );
       });
@@ -513,21 +577,29 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
             child: Text(titleString, 
               style: TextStyle(
                 fontSize: 14.0,
+                color: Colors.black
               )
             ),
           ),
-          subtitle: Text(TimeAgo.getTimeAgo(widget.timestamp.millisecondsSinceEpoch),
-          //subtitle: Text("University of Pennsylvania",
-            style: TextStyle(
-              fontSize: 13.0,
-              color: Colors.grey[600]
-            )
+          subtitle: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
+              );
+            },
+            child: Text(TimeAgo.getTimeAgo(widget.timestamp.millisecondsSinceEpoch),
+              style: TextStyle(
+                fontSize: 13.0,
+                color: Colors.grey[700]
+              )
+            ),
           ),
           trailing: GestureDetector(
               onTap: () {postActions(context, (widget.currentUser.id == widget.goalUserID), widget.goalName);},
                 child: Icon(
                 Icons.more_horiz,
-                color: Colors.grey,
+                color: Colors.grey[700],
               ),
             ),
           dense: false,
@@ -537,46 +609,119 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
   }
 }
 
-Widget makeLikeButton({isActive}) {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey[200]),
-      borderRadius: BorderRadius.circular(50),
-    ),
-    child: Center(
-      child: GestureDetector(
-        onTap: () {},
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(Icons.favorite, color: isActive ? const Color(0xFF2364CC) : Colors.grey, size: 18,),
-            SizedBox(width: 5,),
-            Text("Like", style: TextStyle(color: isActive ? const Color(0xFF2364CC) : Colors.grey[600]),)
-          ],
-        ),
-      ),
-    ),
-  );
+class LikeButton extends StatefulWidget {
+  final String goalID;
+  final User currentUser;
+
+  LikeButton(this.goalID, this.currentUser);
+
+  @override
+  _LikeButtonState createState() => _LikeButtonState();
 }
 
-Widget makeCommentButton() {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey[200]),
-      borderRadius: BorderRadius.circular(50),
-    ),
-    child: Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(Icons.chat, color: Colors.grey, size: 18),
-          SizedBox(width: 5,),
-          Text("Comment", style: TextStyle(color: Colors.grey[600]),)
-        ],
+class _LikeButtonState extends State<LikeButton> {
+  Color buttonColor = const Color(0xff616161);
+  Color textColor = const Color(0xff616161);
+  IconData icon = Icons.favorite_border;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (buttonColor == const Color(0xff616161) && textColor == const Color(0xff616161)) {
+          setState(() {
+            buttonColor = Color(0XFF2196f3);
+            textColor = Color(0XFF2196f3);
+            icon = Icons.favorite;
+
+            likesRef.document(widget.goalID+widget.currentUser.id).setData({
+              "fk_goal_id": widget.goalID,
+              "fk_user_id": widget.currentUser.id,
+              "timestamp": DateTime.now()
+            });
+
+          });    
+        } else {
+          setState(() {
+            buttonColor = Color(0xff616161);
+            textColor = Color(0xff616161);
+            icon = Icons.favorite_border;
+
+            likesRef.document(widget.goalID+widget.currentUser.id).delete();
+
+          });    
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          //border: Border.all(color: Colors.blue[200]),
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(icon, color: buttonColor, size: 18,),
+              SizedBox(width: 5,),
+              Text("Love", style: TextStyle(color: textColor, fontSize: 14.0),)
+            ],
+          ),
+        ),
       ),
-    ),
+    );
+  }
+}
+
+Widget makeCommentButton(goalID) {  
+  return StreamBuilder(
+    stream: commentsRef.where('fk_goal_id', isEqualTo: goalID).snapshots(),
+    builder: (context, snapshot) {
+
+      if (!snapshot.hasData) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            //border: Border.all(color: Colors.grey[200]),
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(Icons.chat_bubble_outline, color: Colors.grey[700], size: 18),
+                SizedBox(width: 5,),
+                Text("Comment", style: TextStyle(color: Colors.grey[700], fontSize: 14.0),)
+              ],
+            ),
+          ),
+        );
+      }
+
+      var count = snapshot.data.documents.length;
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          //border: Border.all(color: Colors.grey[200]),
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.chat_bubble_outline, color: Colors.grey[700], size: 18),
+              SizedBox(width: 5,),
+              Text("Comment ($count)", style: TextStyle(color: Colors.grey[700], fontSize: 14.0),)
+            ],
+          ),
+        ),
+      );
+    }
   );
 }
 
@@ -584,16 +729,16 @@ Widget makeShareButton() {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
     decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey[200]),
+      //border: Border.all(color: Colors.grey[200]),
       borderRadius: BorderRadius.circular(50),
     ),
     child: Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(Icons.share, color: Colors.grey, size: 18),
+          Icon(Icons.share, color: Colors.grey[700], size: 18),
           SizedBox(width: 5,),
-          Text("Share", style: TextStyle(color: Colors.grey[600]),)
+          Text("Share", style: TextStyle(color: Colors.grey[700], fontSize: 14.0),)
         ],
       ),
     ),

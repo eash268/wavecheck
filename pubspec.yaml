@@ -89,5 +89,7 @@ flutter:
     - assets/images/stress.png
     - assets/images/emptyImage.png
     - assets/images/upload.svg
-    - assets/images/bg.jpeg
+    - assets/images/bg2.jpeg
+    - assets/images/bg.jpg
+    - assets/images/bg_drawer.jpg
     - assets/images/bg_upload.jpeg
