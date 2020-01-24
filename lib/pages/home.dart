@@ -64,10 +64,10 @@ class _HomeState extends State<Home> {
         );
       },
       onResume: (Map<String, dynamic> message) async {
-        _scaffoldKey.currentState.openEndDrawer();
+        print("Handle notification click.");
       },
       onLaunch: (Map<String, dynamic> message) async {
-        _scaffoldKey.currentState.openEndDrawer();
+        print("Handle notification click.");
       },
     );
   }
