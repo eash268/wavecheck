@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:WaveCheck/models/user.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,7 +54,8 @@ class _GoalsFeedState extends State<GoalsFeed> {
       (doc) => GoalsItem(doc.documentID, doc['goal_string'], doc['fk_user_id'], doc['urls'][0], doc['timestamp'], doc['completed'], doc['likes'], widget.currentUser)).toList();
 
     setState(() {
-      this.goals = goals.sublist(0, 10);
+      //this.goals = goals.sublist(0, 10);
+      this.goals = goals.sublist(0, min(goals.length, 21));
     });
   }
 
@@ -136,25 +139,31 @@ class _GoalsFeedState extends State<GoalsFeed> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            margin: EdgeInsets.only(left: 16.0, right: 5.0),
-            child: Icon(
-              Icons.group,
-              color: Colors.grey[700],
-              size: 62,
+            height: 62,
+            width: 62,
+            margin: EdgeInsets.only(left: 18.0, right: 4.0),
+            padding: EdgeInsets.all(2.5),
+            decoration: BoxDecoration(
+              color: Colors.grey[400],
+              border: Border.all(
+                color: Colors.grey[700],
+                width: 1
+              ),
+              borderRadius: BorderRadius.circular(1000),
             ),
+            child: Icon(Icons.group, color: Colors.grey[700], size: 30,)
           ),
           
           Container(
-            margin: EdgeInsets.only(left: 16.0, right: 5.0, top: 0.0),
+            margin: EdgeInsets.only(left: 16.0, right: 5.0, top: 2.0),
             child: Text(
-              "Everyone",
+              "All Goals",
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 13.0,
               ),
             ),
           ),
-          
-
         ],
       ),
     );
@@ -170,16 +179,24 @@ class _GoalsFeedState extends State<GoalsFeed> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            margin: EdgeInsets.only(left: 16.0, right: 5.0),
+            margin: EdgeInsets.only(left: 16.0, right: 2.0),
+            padding: EdgeInsets.all(2.5),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey[400],
+                width: 1
+              ),
+              borderRadius: BorderRadius.circular(1000),
+            ),
             child: CircleAvatar(
               //backgroundColor: Theme.of(context).primaryColor,
               backgroundImage: CachedNetworkImageProvider(profilePic),
-              minRadius: 30.0,
+              minRadius: 28.0,
             ),
           ),
           
           Container(
-            margin: EdgeInsets.only(left: 16.0, right: 5.0, top: 4.0),
+            margin: EdgeInsets.only(left: 16.0, right: 5.0, top: 2.0),
             child: Text(
               profileName.split(" ")[0],
               overflow: TextOverflow.ellipsis,
@@ -189,8 +206,6 @@ class _GoalsFeedState extends State<GoalsFeed> {
               ),
             ),
           ),
-          
-
         ],
       ),
     );
@@ -209,10 +224,10 @@ class _GoalsFeedState extends State<GoalsFeed> {
               return circularProgress();
             }
             
+            List<Widget> allUsers = new List<Widget>();
             List<Widget> currentUser = new List<Widget>();
             List<Widget> otherUsers = new List<Widget>();
-            //users.add(refreshButton());
-            //users.add(addNewMemberButton());
+
             for (var i = 0; i < snapshot.data.documents.length; i++) {
                 var doc = snapshot.data.documents[i];
                 if (widget.currentUser.id == doc.documentID) {
@@ -221,7 +236,9 @@ class _GoalsFeedState extends State<GoalsFeed> {
                   otherUsers.add(userProfilePicture(doc.documentID, doc['first_name'] + ' ' + doc['last_name'], doc['profile_pic']));
                 }
             }
-            List<Widget> users = currentUser + otherUsers;
+
+            allUsers.add(everyoneButton());
+            List<Widget> users = allUsers + currentUser + otherUsers;
             //users.add(addNewMemberButton());
 
             return SingleChildScrollView(
@@ -290,7 +307,7 @@ class _GoalsFeedState extends State<GoalsFeed> {
                   }
               }
 
-              //allUsers.add(everyoneButton());
+              allUsers.add(everyoneButton());
               List<Widget> users = allUsers + currentUser + otherUsers;
 
               return SingleChildScrollView(
@@ -331,12 +348,14 @@ class _GoalsFeedState extends State<GoalsFeed> {
   
   @override
   Widget build(context) {
-    return LiquidPullToRefresh(
-        onRefresh: () => _getTimeline(), 
-        child: buildTimeline(),
-        color: Colors.blue,
-        backgroundColor: Colors.white,
-        showChildOpacityTransition: false,
-    );
+    // return LiquidPullToRefresh(
+    //     onRefresh: () => _getTimeline(), 
+    //     child: buildTimeline(),
+    //     color: Colors.blue,
+    //     backgroundColor: Colors.white,
+    //     showChildOpacityTransition: false,
+    // );
+
+    return buildTimeline();
   }
 }

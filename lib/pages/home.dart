@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:WaveCheck/models/user.dart';
@@ -22,6 +23,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   bool isAuth = false;
   var _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   @override
   void initState() {
@@ -38,6 +40,36 @@ class _HomeState extends State<Home> {
     }).catchError((err) {
       print('Error signing in: $err');
     });
+
+    _firebaseMessaging.getToken().then((token) {
+      print("Token $token");
+    });
+    
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) {
+        //print("Message: $message");
+        return showDialog(
+          context: context,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text(message['notification']['body']),
+              children: <Widget>[
+                SimpleDialogOption(
+                  child: Text("Close"),
+                  onPressed: () => Navigator.pop(context),
+                )
+              ],
+            );
+          },
+        );
+      },
+      onResume: (Map<String, dynamic> message) async {
+        _scaffoldKey.currentState.openEndDrawer();
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        _scaffoldKey.currentState.openEndDrawer();
+      },
+    );
   }
 
   handleSignIn(GoogleSignInAccount account) async {
@@ -52,6 +84,16 @@ class _HomeState extends State<Home> {
         isAuth = false;
       });
     }
+
+    _firebaseMessaging.requestNotificationPermissions(
+      const IosNotificationSettings(sound: true, badge: true, alert: true)
+    );
+
+    _firebaseMessaging.onIosSettingsRegistered
+      .listen((IosNotificationSettings settings) {
+        print("Settings registered $settings");
+    });
+    
   }
 
   createUserInFirestore() async {
@@ -114,14 +156,15 @@ class _HomeState extends State<Home> {
                         color: Colors.black
                       ),
                     ),
-                    /*
-                    Text("What are your goals, " + currentUser.first_name + "?",
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    */
+
+                    // Text(Welcome!,
+                    //   overflow: TextOverflow.fade,
+                    //   style: TextStyle(
+                    //     fontSize: 14.0,
+                    //     fontFamily: 'Roboto',
+                    //   ),
+                    // ),
+
                   ],
                 ),
               )

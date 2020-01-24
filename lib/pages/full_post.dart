@@ -58,6 +58,10 @@ class _FullPostState extends State<FullPost> {
         ),
         onDismissed: (direction) {
           commentsRef.document(commentID).delete();
+          Navigator.pushAndRemoveUntil(context,   
+            MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
+            ModalRoute.withName('/')
+          );
         },
       );
     } else {
@@ -87,6 +91,11 @@ class _FullPostState extends State<FullPost> {
       });
 
       _formKey.currentState.reset();
+
+      Navigator.pushAndRemoveUntil(context,   
+        MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
+        ModalRoute.withName('/')
+      ); 
 
     }
   }
@@ -132,11 +141,11 @@ class _FullPostState extends State<FullPost> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         bottomOpacity: 0.0,
-        elevation: 0.0,
+        elevation: 1.0,
         iconTheme: IconThemeData(
           color: Colors.grey[700], //change your color here
         ),
-        title: Text("",
+        title: Text("Comments",
           style: TextStyle(
             fontSize: 20.0,
             fontFamily: 'Roboto',

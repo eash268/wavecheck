@@ -282,7 +282,9 @@ class _FullGoalsItemState extends State<FullGoalsItem> {
               ],
             ),
             GestureDetector(
-              onTap: () {},
+              onLongPress: () {
+                Share.share(widget.goalImageURL);
+              },
               child: widget.completed? _showImageSlider(widget.goalImageURL) : Container(height: 0.0, width: 0.0, padding: EdgeInsets.all(0.0),),
             ),
             
@@ -329,28 +331,6 @@ class _FullGoalsItemState extends State<FullGoalsItem> {
                 ],
               ),
             ),
-            Divider(height: 0, color: Colors.grey[350], indent: 12.0, endIndent: 12.0,),
-            SizedBox(height: 6.0,),
-            Container(
-              margin: EdgeInsets.only(left: 12.0, right: 12.0, bottom: 6.0, top: 0.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  LikeButton(widget.goalID, widget.currentUser),
-                  GestureDetector(
-                    onTap: () {},
-                    child: makeCommentButton(widget.goalID),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      (widget.completed == true)? Share.share(widget.goalImageURL) : Share.share("Goal: " + widget.goalName);
-                    },
-                    child: makeShareButton(),
-                  ),
-                ],
-              ),
-            ),
-
 
           ],
         ),
@@ -538,10 +518,29 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
         return ListTile(
           leading: GestureDetector(
             onTap: () {},
-            child: CircleAvatar(
-              //backgroundColor: Theme.of(context).primaryColor,
-              backgroundImage: CachedNetworkImageProvider(profilePic),
-            ),
+            child: Stack(
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: CachedNetworkImageProvider(profilePic),
+                ),
+                widget.completed? Container(
+                  padding: EdgeInsets.only(left: 25.0, top: 20.0),
+                  child: Icon(
+                    Icons.disc_full,
+                    color: Colors.white,
+                    size: 20.0,
+                  ),
+                ) : SizedBox(height: 0,),
+                widget.completed? Container(
+                  padding: EdgeInsets.only(left: 25.0, top: 20.0),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 20.0,
+                  ),
+                ) : SizedBox(height: 0,)
+              ],
+            )
           ),
           title: GestureDetector(
             onTap: () {},
@@ -582,47 +581,42 @@ class LikeButton extends StatefulWidget {
 }
 
 class _LikeButtonState extends State<LikeButton> {
-  Color buttonColor = const Color(0xff616161);
-  Color textColor = const Color(0xff616161);
+  Color buttonColor = Color(0xff616161);
+  Color textColor = Color(0xff616161);
   IconData icon = Icons.favorite_border;
 
   @override
   void initState() {
+    _getButtonColors();
     super.initState();
+  }
+
+  _getButtonColors() async {
+    DocumentSnapshot doc = await likesRef.document(widget.goalID+widget.currentUser.id).get();
+
+    if (!doc.exists) {
+      setState(() {
+        buttonColor = Color(0xff616161);
+        textColor = Color(0xff616161);
+        icon = Icons.favorite_border;
+      });
+    } else {
+      setState(() {
+        buttonColor = Color(0XFF2196f3);
+        textColor = Color(0XFF2196f3);
+        icon = Icons.favorite;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        if (buttonColor == const Color(0xff616161) && textColor == const Color(0xff616161)) {
-          setState(() {
-            buttonColor = Color(0XFFF44336);
-            textColor = Color(0XFFF44336);
-            icon = Icons.favorite;
-
-            likesRef.document(widget.goalID+widget.currentUser.id).setData({
-              "fk_goal_id": widget.goalID,
-              "fk_user_id": widget.currentUser.id,
-              "timestamp": DateTime.now()
-            });
-
-          });    
-        } else {
-          setState(() {
-            buttonColor = Color(0xff616161);
-            textColor = Color(0xff616161);
-            icon = Icons.favorite_border;
-
-            likesRef.document(widget.goalID+widget.currentUser.id).delete();
-
-          });    
-        }
-      },
+      onTap: () {},
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          //border: Border.all(color: Colors.grey[200]),
+          //border: Border.all(color: Colors.blue[200]),
           borderRadius: BorderRadius.circular(50),
         ),
         child: Center(

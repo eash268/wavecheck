@@ -45,7 +45,6 @@ class _GoalsItemState extends State<GoalsItem> {
       "timestamp": DateTime.now(),
       "completed": false,
       "urls": [""],
-      "joins": [],
     });
 
     await joinsRef.document().setData({
@@ -294,6 +293,9 @@ class _GoalsItemState extends State<GoalsItem> {
                   MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
                 );
               },
+              onLongPress: () {
+                Share.share(widget.goalImageURL);
+              },
               child: widget.completed? _showImageSlider(widget.goalImageURL) : Container(height: 0.0, width: 0.0, padding: EdgeInsets.all(0.0),),
             ),
             
@@ -340,7 +342,7 @@ class _GoalsItemState extends State<GoalsItem> {
                 ],
               ),
             ),
-            Divider(height: 0, color: Colors.grey[350], indent: 12.0, endIndent: 12.0,),
+            Divider(height: 0, color: Colors.grey[400], indent: 12.0, endIndent: 12.0,),
             SizedBox(height: 6.0,),
             Container(
               margin: EdgeInsets.only(left: 12.0, right: 12.0, bottom: 6.0, top: 0.0),
@@ -399,8 +401,6 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
       "timestamp": DateTime.now(),
       "completed": false,
       "urls": [""],
-      "likes": [],
-      "joins": [],
     });
 
     await joinsRef.document().setData({
@@ -477,6 +477,30 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
           ],
         );
       });
+  }
+
+  void _settingModalBottomSheet(context){
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc){
+          return Container(
+            child: new Wrap(
+            children: <Widget>[
+              new ListTile(
+                leading: new Icon(Icons.music_note),
+                title: new Text('Complete this goal'),
+                onTap: () => {}          
+              ),
+              new ListTile(
+                leading: new Icon(Icons.videocam),
+                title: new Text('Join this goal'),
+                onTap: () => {},          
+              ),
+            ],
+          ),
+        );
+      }
+    );
   }
 
   postActions(parentContext, currentUserOwnsPost, goalName) {
@@ -562,10 +586,29 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
                 MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
               );
             },
-            child: CircleAvatar(
-              //backgroundColor: Theme.of(context).primaryColor,
-              backgroundImage: CachedNetworkImageProvider(profilePic),
-            ),
+            child: Stack(
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: CachedNetworkImageProvider(profilePic),
+                ),
+                widget.completed? Container(
+                  padding: EdgeInsets.only(left: 25.0, top: 22.0),
+                  child: Icon(
+                    Icons.disc_full,
+                    color: Colors.white,
+                    size: 18.0,
+                  ),
+                ) : SizedBox(height: 0,),
+                widget.completed? Container(
+                  padding: EdgeInsets.only(left: 25.0, top: 22.0),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: Colors.green[500],
+                    size: 18.0,
+                  ),
+                ) : SizedBox(height: 0,)
+              ],
+            )
           ),
           title: GestureDetector(
             onTap: () {
@@ -620,13 +663,32 @@ class LikeButton extends StatefulWidget {
 }
 
 class _LikeButtonState extends State<LikeButton> {
-  Color buttonColor = const Color(0xff616161);
-  Color textColor = const Color(0xff616161);
+  Color buttonColor = Color(0xff616161);
+  Color textColor = Color(0xff616161);
   IconData icon = Icons.favorite_border;
 
   @override
   void initState() {
+    _getButtonColors();
     super.initState();
+  }
+
+  _getButtonColors() async {
+    DocumentSnapshot doc = await likesRef.document(widget.goalID+widget.currentUser.id).get();
+
+    if (!doc.exists) {
+      setState(() {
+        buttonColor = Color(0xff616161);
+        textColor = Color(0xff616161);
+        icon = Icons.favorite_border;
+      });
+    } else {
+      setState(() {
+        buttonColor = Color(0XFF2196f3);
+        textColor = Color(0XFF2196f3);
+        icon = Icons.favorite;
+      });
+    }
   }
 
   @override

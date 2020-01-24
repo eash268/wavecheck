@@ -14,7 +14,6 @@ import 'package:uuid/uuid.dart';
 
 final goalsRef = Firestore.instance.collection('goals');
 final StorageReference storageRef = FirebaseStorage.instance.ref();
-final DateTime timestamp = DateTime.now();
 
 class Upload extends StatefulWidget {
   final User currentUser;
@@ -189,7 +188,7 @@ class _UploadState extends State<Upload> with AutomaticKeepAliveClientMixin<Uplo
       {
         'urls': [mediaUrl],
         'completed': true,
-        'timestamp': timestamp
+        'timestamp': DateTime.now()
       }
     );
   }
