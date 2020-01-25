@@ -55,7 +55,7 @@ class _GoalsFeedState extends State<GoalsFeed> {
 
     setState(() {
       //this.goals = goals.sublist(0, 10);
-      this.goals = goals.sublist(0, min(goals.length, 21));
+      this.goals = goals.sublist(0, min(goals.length, 15));
     });
   }
 
@@ -141,7 +141,7 @@ class _GoalsFeedState extends State<GoalsFeed> {
           Container(
             height: 62,
             width: 62,
-            margin: EdgeInsets.only(left: 18.0, right: 4.0),
+            margin: EdgeInsets.only(left: 18.0, right: 2.0),
             padding: EdgeInsets.all(2.5),
             decoration: BoxDecoration(
               color: Colors.grey[400],
@@ -348,14 +348,14 @@ class _GoalsFeedState extends State<GoalsFeed> {
   
   @override
   Widget build(context) {
-    // return LiquidPullToRefresh(
-    //     onRefresh: () => _getTimeline(), 
-    //     child: buildTimeline(),
-    //     color: Colors.blue,
-    //     backgroundColor: Colors.white,
-    //     showChildOpacityTransition: false,
-    // );
+    return LiquidPullToRefresh(
+        onRefresh: () => _getTimeline(), 
+        child: buildTimeline(),
+        color: Colors.blue,
+        backgroundColor: Colors.white,
+        showChildOpacityTransition: false,
+    );
 
-    return buildTimeline();
+    // return buildTimeline();
   }
 }

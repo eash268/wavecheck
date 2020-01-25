@@ -12,6 +12,7 @@ import 'package:share/share.dart';
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final goalsRef = Firestore.instance.collection('goals');
 final usersRef = Firestore.instance.collection('users');
+final tokensRef = Firestore.instance.collection('tokens');
 final DateTime timestamp = DateTime.now();
 User currentUser;
 
@@ -47,8 +48,7 @@ class _HomeState extends State<Home> {
     
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) {
-        //print("Message: $message");
-        return showDialog(
+        showDialog(
           context: context,
           builder: (context) {
             return SimpleDialog(
@@ -79,21 +79,19 @@ class _HomeState extends State<Home> {
       setState(() {
         isAuth = true;
       });
+      _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true)
+      );
+
+      _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+          print("Settings registered $settings");
+      });
     } else {
       setState(() {
         isAuth = false;
       });
     }
-
-    _firebaseMessaging.requestNotificationPermissions(
-      const IosNotificationSettings(sound: true, badge: true, alert: true)
-    );
-
-    _firebaseMessaging.onIosSettingsRegistered
-      .listen((IosNotificationSettings settings) {
-        print("Settings registered $settings");
-    });
-    
   }
 
   createUserInFirestore() async {
@@ -127,7 +125,22 @@ class _HomeState extends State<Home> {
     googleSignIn.signOut();
   }
 
+  _logToken() async {
+    _firebaseMessaging.getToken().then((token) {
+      print("Token $token");
+      tokensRef.document().setData({
+        "fk_user_id": currentUser.id,
+        "user": currentUser.first_name + ' ' + currentUser.last_name,
+        "token": token,
+        "timestamp": timestamp
+      });
+    });
+  }
+
   Scaffold buildAuthScreen() {
+    
+    _logToken();
+    
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,

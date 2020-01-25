@@ -168,7 +168,8 @@ class _GoalsItemState extends State<GoalsItem> {
         placeholder: (context, url) => CircularProgressIndicator(backgroundColor: Color(0xFF2364CC)),
         errorWidget: (context, url, error) => Icon(Icons.error),
         fit: BoxFit.fitWidth,
-        height: 200.0,
+        // used to be 200.0
+        height: MediaQuery.of(context).size.height * 0.35,
         width: double.infinity,
      ),
     );
@@ -349,7 +350,7 @@ class _GoalsItemState extends State<GoalsItem> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  LikeButton(widget.goalID, widget.currentUser),
+                  makeLikeButton(widget.goalID, widget.currentUser),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -652,92 +653,89 @@ class _GoalUserHeaderState extends State<GoalUserHeader> {
   }
 }
 
-class LikeButton extends StatefulWidget {
-  final String goalID;
-  final User currentUser;
+Widget makeLikeButton(goalID, currentUser) {
+  return StreamBuilder(
+    stream: likesRef.where('fk_goal_id', isEqualTo: goalID).where('fk_user_id', isEqualTo: currentUser.id).orderBy('timestamp', descending: false).snapshots(),
+    builder: (context, snapshot) {
 
-  LikeButton(this.goalID, this.currentUser);
-
-  @override
-  _LikeButtonState createState() => _LikeButtonState();
-}
-
-class _LikeButtonState extends State<LikeButton> {
-  Color buttonColor = Color(0xff616161);
-  Color textColor = Color(0xff616161);
-  IconData icon = Icons.favorite_border;
-
-  @override
-  void initState() {
-    _getButtonColors();
-    super.initState();
-  }
-
-  _getButtonColors() async {
-    DocumentSnapshot doc = await likesRef.document(widget.goalID+widget.currentUser.id).get();
-
-    if (!doc.exists) {
-      setState(() {
-        buttonColor = Color(0xff616161);
-        textColor = Color(0xff616161);
-        icon = Icons.favorite_border;
-      });
-    } else {
-      setState(() {
-        buttonColor = Color(0XFF2196f3);
-        textColor = Color(0XFF2196f3);
-        icon = Icons.favorite;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (buttonColor == const Color(0xff616161) && textColor == const Color(0xff616161)) {
-          setState(() {
-            buttonColor = Color(0XFF2196f3);
-            textColor = Color(0XFF2196f3);
-            icon = Icons.favorite;
-
-            likesRef.document(widget.goalID+widget.currentUser.id).setData({
-              "fk_goal_id": widget.goalID,
-              "fk_user_id": widget.currentUser.id,
+      if (!snapshot.hasData) {
+        return GestureDetector(
+          onTap: () {
+            likesRef.document(goalID+currentUser.id).setData({
+              "fk_goal_id": goalID,
+              "fk_user_id": currentUser.id,
               "timestamp": DateTime.now()
             });
-
-          });    
-        } else {
-          setState(() {
-            buttonColor = Color(0xff616161);
-            textColor = Color(0xff616161);
-            icon = Icons.favorite_border;
-
-            likesRef.document(widget.goalID+widget.currentUser.id).delete();
-
-          });    
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          //border: Border.all(color: Colors.blue[200]),
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(icon, color: buttonColor, size: 18,),
-              SizedBox(width: 5,),
-              Text("Love", style: TextStyle(color: textColor, fontSize: 14.0),)
-            ],
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.favorite_border, color: Colors.grey[700], size: 18,),
+                  SizedBox(width: 5,),
+                  Text("Love", style: TextStyle(color: Colors.grey[700], fontSize: 14.0),)
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      if (snapshot.data == null || snapshot.data.documents.length == 0) {
+        return GestureDetector(
+          onTap: () {
+            likesRef.document(goalID+currentUser.id).setData({
+              "fk_goal_id": goalID,
+              "fk_user_id": currentUser.id,
+              "timestamp": DateTime.now()
+            });
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.favorite_border, color: Colors.grey[700], size: 18,),
+                  SizedBox(width: 5,),
+                  Text("Love", style: TextStyle(color: Colors.grey[700], fontSize: 14.0),)
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      return GestureDetector(
+        onTap: () {
+          likesRef.document(goalID+currentUser.id).delete();
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(Icons.favorite, color: Colors.blue, size: 18,),
+                SizedBox(width: 5,),
+                Text("Love", style: TextStyle(color: Colors.blue, fontSize: 14.0),)
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
+
+    }
+  );
 }
 
 Widget makeCommentButton(goalID) {  

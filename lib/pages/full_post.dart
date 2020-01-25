@@ -92,10 +92,10 @@ class _FullPostState extends State<FullPost> {
 
       _formKey.currentState.reset();
 
-      Navigator.pushAndRemoveUntil(context,   
-        MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
-        ModalRoute.withName('/')
-      ); 
+      // Navigator.pushAndRemoveUntil(context,   
+      //   MaterialPageRoute(builder: (context) => FullPost(widget.goalID, widget.goalName, widget.goalUserID, widget.goalImageURL, widget.timestamp, widget.completed, widget.goalLikes, widget.currentUser)),
+      //   ModalRoute.withName('/')
+      // ); 
 
     }
   }
